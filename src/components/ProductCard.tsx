@@ -66,7 +66,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
+      <Card className="overflow-hidden hover:shadow-md transition-all duration-300 group h-full flex flex-col">
         <div 
           className="relative aspect-square overflow-hidden bg-muted cursor-pointer"
           onClick={() => setShowModal(true)}
@@ -74,23 +74,23 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <img
             src={resolvedImages[currentImageIndex]}
             alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           {product.popular && (
-            <Badge className="absolute top-2 right-2 bg-accent text-accent-foreground">
-              <Star className="w-3 h-3 mr-1" />
+            <Badge className="absolute top-1.5 right-1.5 text-xs py-0 px-2 bg-accent text-accent-foreground">
+              <Star className="w-2.5 h-2.5 mr-0.5" />
               Popular
             </Badge>
           )}
           {resolvedImages.length > 1 && (
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex gap-1">
               {resolvedImages.map((_, index) => (
                 <div
                   key={index}
-                  className={`h-1.5 rounded-full transition-all ${
+                  className={`h-1 rounded-full transition-all ${
                     index === currentImageIndex 
-                      ? "w-6 bg-white" 
-                      : "w-1.5 bg-white/50"
+                      ? "w-4 bg-white" 
+                      : "w-1 bg-white/50"
                   }`}
                 />
               ))}
@@ -98,36 +98,39 @@ const ProductCard = ({ product }: ProductCardProps) => {
           )}
         </div>
       
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <h3 className="font-semibold text-lg text-foreground">{product.name}</h3>
-            <Badge variant="outline" className="mt-1">{product.category}</Badge>
-          </div>
+      <CardContent className="p-3 flex-1 flex flex-col">
+        <div className="mb-2">
+          <h3 className="font-semibold text-sm md:text-base text-foreground line-clamp-1 mb-1">
+            {product.name}
+          </h3>
+          <Badge variant="outline" className="text-xs py-0 px-1.5">
+            {product.category}
+          </Badge>
         </div>
         
-        <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+        <p className="text-xs md:text-sm text-muted-foreground line-clamp-2 mb-auto">
           {product.description}
         </p>
         
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-2">
           <div>
-            <span className="text-2xl font-bold text-primary">
+            <span className="text-lg md:text-xl font-bold text-primary">
               ₹{(product.pricePerGram * 250).toFixed(0)}
             </span>
-            <span className="text-sm text-muted-foreground ml-1">/250g</span>
+            <span className="text-xs text-muted-foreground ml-0.5">/250g</span>
           </div>
         </div>
       </CardContent>
       
-      <CardFooter className="p-4 pt-0">
+      <CardFooter className="p-3 pt-0">
         <Button
-          className="w-full"
+          className="w-full h-9 text-sm"
+          size="sm"
           onClick={addToCart}
           disabled={!product.inStock}
         >
-          <ShoppingCart className="mr-2 h-4 w-4" />
-          {product.inStock ? "Add to Cart" : "Out of Stock"}
+          <ShoppingCart className="mr-1.5 h-3.5 w-3.5" />
+          {product.inStock ? "Add" : "Out of Stock"}
         </Button>
       </CardFooter>
     </Card>
