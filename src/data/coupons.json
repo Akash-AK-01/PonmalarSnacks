@@ -1,0 +1,16 @@
+[
+  {
+    "code": "WELCOME10",
+    "discount": 10,
+    "type": "percentage",
+    "active": true,
+    "description": "Welcome offer - 10% off on first order"
+  },
+  {
+    "code": "FESTIVE50",
+    "discount": 50,
+    "type": "flat",
+    "active": true,
+    "description": "Festive special - ₹50 off"
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "1",
+    "name": "Classic Murukku",
+    "description": "Traditional spiral-shaped crispy snack made with rice flour and urad dal. Perfect with evening tea!",
+    "pricePerGram": 0.6,
+    "images": ["/assets/murukku.jpg"],
+    "category": "Savory",
+    "inStock": true,
+    "popular": true
+  },
+  {
+    "id": "2",
+    "name": "Kadalai Mittai",
+    "description": "Sweet peanut candy bars made with roasted peanuts and pure jaggery. A healthy traditional sweet!",
+    "pricePerGram": 0.8,
+    "images": ["/assets/kadalai-mittai.jpg"],
+    "category": "Sweet",
+    "inStock": true,
+    "popular": true
+  },
+  {
+    "id": "3",
+    "name": "Special Mixture",
+    "description": "Spicy snack mix with sev, peanuts, cashews, and curry leaves. A perfect tea-time companion!",
+    "pricePerGram": 0.7,
+    "images": ["/assets/mixture.jpg"],
+    "category": "Savory",
+    "inStock": true,
+    "popular": true
+  }
+]

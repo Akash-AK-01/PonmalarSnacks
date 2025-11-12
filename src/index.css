@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Tamil-inspired color palette */
+    --background: 45 60% 97%;
+    --foreground: 100 40% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 100 40% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 100 40% 15%;
+
+    /* Banana leaf green - deep and rich */
+    --primary: 100 60% 25%;
+    --primary-foreground: 45 100% 98%;
+
+    /* Terracotta orange */
+    --secondary: 14 75% 47%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 45 40% 90%;
+    --muted-foreground: 100 20% 40%;
+
+    /* Golden turmeric */
+    --accent: 42 100% 50%;
+    --accent-foreground: 100 40% 15%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 45 30% 85%;
+    --input: 45 30% 85%;
+    --ring: 100 60% 25%;
+
+    --radius: 0.75rem;
+
+    /* Custom design tokens */
+    --gradient-primary: linear-gradient(135deg, hsl(100 60% 25%), hsl(100 55% 35%));
+    --gradient-warm: linear-gradient(135deg, hsl(42 100% 50%), hsl(14 75% 47%));
+    --shadow-soft: 0 4px 20px -4px hsl(100 60% 25% / 0.15);
+    --shadow-card: 0 2px 12px -2px hsl(100 30% 20% / 0.1);
+    
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 100 40% 15%;
+    --sidebar-primary: 100 60% 25%;
+    --sidebar-primary-foreground: 45 100% 98%;
+    --sidebar-accent: 45 40% 90%;
+    --sidebar-accent-foreground: 100 40% 15%;
+    --sidebar-border: 45 30% 85%;
+    --sidebar-ring: 100 60% 25%;
+  }
+
+  .dark {
+    --background: 100 25% 10%;
+    --foreground: 45 60% 95%;
+
+    --card: 100 20% 12%;
+    --card-foreground: 45 60% 95%;
+
+    --popover: 100 20% 12%;
+    --popover-foreground: 45 60% 95%;
+
+    --primary: 100 55% 45%;
+    --primary-foreground: 100 25% 10%;
+
+    --secondary: 14 70% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 100 15% 20%;
+    --muted-foreground: 45 30% 70%;
+
+    --accent: 42 95% 60%;
+    --accent-foreground: 100 25% 10%;
+
+    --destructive: 0 75% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 100 15% 25%;
+    --input: 100 15% 25%;
+    --ring: 100 55% 45%;
+    
+    --sidebar-background: 100 20% 12%;
+    --sidebar-foreground: 45 60% 95%;
+    --sidebar-primary: 100 55% 45%;
+    --sidebar-primary-foreground: 100 25% 10%;
+    --sidebar-accent: 100 15% 20%;
+    --sidebar-accent-foreground: 45 60% 95%;
+    --sidebar-border: 100 15% 25%;
+    --sidebar-ring: 100 55% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
