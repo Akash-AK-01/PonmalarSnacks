@@ -20,10 +20,13 @@ const AdminDashboard = () => {
     name: "",
     description: "",
     pricePerGram: "",
+    price: "",
+    priceUnit: "per-gram" as "per-gram" | "per-piece" | "per-100g" | "per-250g" | "per-500g" | "per-kg",
     category: "Savory",
     images: [] as string[],
   });
   const [imageInput, setImageInput] = useState("");
+  const [uploadMethod, setUploadMethod] = useState<"file" | "url">("file");
 
   useEffect(() => {
     const isAdmin = localStorage.getItem("adminAuth");
@@ -41,11 +44,44 @@ const AdminDashboard = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Calculate pricePerGram based on selected unit
+    let calculatedPricePerGram: number;
+    const priceValue = parseFloat(formData.price);
+    
+    switch (formData.priceUnit) {
+      case "per-piece":
+        // For per-piece pricing, we'll use the price as-is and store unit info
+        calculatedPricePerGram = priceValue; // Will be displayed differently
+        break;
+      case "per-100g":
+        calculatedPricePerGram = priceValue / 100;
+        break;
+      case "per-250g":
+        calculatedPricePerGram = priceValue / 250;
+        break;
+      case "per-500g":
+        calculatedPricePerGram = priceValue / 500;
+        break;
+      case "per-kg":
+        calculatedPricePerGram = priceValue / 1000;
+        break;
+      case "per-gram":
+      default:
+        calculatedPricePerGram = priceValue;
+        break;
+    }
+    
     if (editingProduct) {
       // Update existing product
       const updatedProducts = products.map(p => 
         p.id === editingProduct.id 
-          ? { ...p, ...formData, pricePerGram: parseFloat(formData.pricePerGram) }
+          ? { 
+              ...p, 
+              ...formData, 
+              pricePerGram: calculatedPricePerGram,
+              priceUnit: formData.priceUnit,
+              originalPrice: priceValue,
+            }
           : p
       );
       setProducts(updatedProducts);
@@ -54,8 +90,13 @@ const AdminDashboard = () => {
       // Add new product
       const newProduct = {
         id: Date.now().toString(),
-        ...formData,
-        pricePerGram: parseFloat(formData.pricePerGram),
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+        images: formData.images,
+        pricePerGram: calculatedPricePerGram,
+        priceUnit: formData.priceUnit,
+        originalPrice: priceValue,
         inStock: true,
         popular: false,
       };
@@ -74,6 +115,35 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    Array.from(files).forEach(file => {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} is not an image file`);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const imageData = event.target?.result as string;
+        setFormData(prev => ({
+          ...prev,
+          images: [...prev.images, imageData]
+        }));
+        toast.success(`${file.name} added!`);
+      };
+      reader.onerror = () => {
+        toast.error(`Failed to read ${file.name}`);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Reset the file input
+    e.target.value = '';
+  };
+
   const handleRemoveImage = (index: number) => {
     setFormData({
       ...formData, 
@@ -87,10 +157,13 @@ const AdminDashboard = () => {
       name: "",
       description: "",
       pricePerGram: "",
+      price: "",
+      priceUnit: "per-gram",
       category: "Savory",
       images: [],
     });
     setImageInput("");
+    setUploadMethod("file");
     setEditingProduct(null);
     setShowAddProduct(false);
   };
@@ -101,6 +174,8 @@ const AdminDashboard = () => {
       name: product.name,
       description: product.description,
       pricePerGram: product.pricePerGram.toString(),
+      price: (product.originalPrice || product.pricePerGram).toString(),
+      priceUnit: product.priceUnit || "per-gram",
       category: product.category,
       images: product.images || [product.image],
     });
@@ -187,15 +262,16 @@ const AdminDashboard = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="pricePerGram">Price per Gram (₹)</Label>
-                    <Input
-                      id="pricePerGram"
-                      type="number"
-                      step="0.01"
-                      value={formData.pricePerGram}
-                      onChange={(e) => setFormData({...formData, pricePerGram: e.target.value})}
-                      required
-                    />
+                    <Label htmlFor="category">Category</Label>
+                    <select
+                      id="category"
+                      className="w-full p-2 border rounded-md"
+                      value={formData.category}
+                      onChange={(e) => setFormData({...formData, category: e.target.value})}
+                    >
+                      <option value="Savory">Savory</option>
+                      <option value="Sweet">Sweet</option>
+                    </select>
                   </div>
                 </div>
 
@@ -211,36 +287,112 @@ const AdminDashboard = () => {
 
                 <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
+                    <Label htmlFor="priceUnit">Pricing Unit</Label>
                     <select
-                      id="category"
+                      id="priceUnit"
                       className="w-full p-2 border rounded-md"
-                      value={formData.category}
-                      onChange={(e) => setFormData({...formData, category: e.target.value})}
+                      value={formData.priceUnit}
+                      onChange={(e) => setFormData({...formData, priceUnit: e.target.value as any})}
                     >
-                      <option value="Savory">Savory</option>
-                      <option value="Sweet">Sweet</option>
+                      <option value="per-piece">Per Piece</option>
+                      <option value="per-gram">Per Gram</option>
+                      <option value="per-100g">Per 100 Grams</option>
+                      <option value="per-250g">Per 250 Grams</option>
+                      <option value="per-500g">Per 500 Grams</option>
+                      <option value="per-kg">Per Kilogram</option>
                     </select>
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>Product Images</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        value={imageInput}
-                        onChange={(e) => setImageInput(e.target.value)}
-                        placeholder="/assets/product-image.jpg"
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') {
-                            e.preventDefault();
-                            handleAddImage();
-                          }
-                        }}
-                      />
-                      <Button type="button" onClick={handleAddImage}>
-                        Add
+                    <Label htmlFor="price">
+                      Price (₹)
+                      {formData.priceUnit === "per-piece" && " - Per Piece"}
+                      {formData.priceUnit === "per-gram" && " - Per Gram"}
+                      {formData.priceUnit === "per-100g" && " - For 100g"}
+                      {formData.priceUnit === "per-250g" && " - For 250g"}
+                      {formData.priceUnit === "per-500g" && " - For 500g"}
+                      {formData.priceUnit === "per-kg" && " - Per Kg"}
+                    </Label>
+                    <Input
+                      id="price"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={formData.price}
+                      onChange={(e) => setFormData({...formData, price: e.target.value})}
+                      placeholder="Enter price"
+                      required
+                    />
+                    {formData.price && formData.priceUnit !== "per-gram" && formData.priceUnit !== "per-piece" && (
+                      <p className="text-sm text-muted-foreground">
+                        ≈ ₹{(parseFloat(formData.price) / 
+                          (formData.priceUnit === "per-100g" ? 100 : 
+                           formData.priceUnit === "per-250g" ? 250 : 
+                           formData.priceUnit === "per-500g" ? 500 : 
+                           formData.priceUnit === "per-kg" ? 1000 : 1)).toFixed(2)} per gram
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Product Images</Label>
+                    
+                    {/* Upload Method Toggle */}
+                    <div className="flex gap-2 mb-2">
+                      <Button
+                        type="button"
+                        variant={uploadMethod === "file" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setUploadMethod("file")}
+                      >
+                        Upload File
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={uploadMethod === "url" ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setUploadMethod("url")}
+                      >
+                        Add URL
                       </Button>
                     </div>
+
+                    {/* File Upload */}
+                    {uploadMethod === "file" && (
+                      <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleFileUpload}
+                          className="cursor-pointer"
+                        />
+                        <p className="text-sm text-muted-foreground mt-2">
+                          Select one or more images to upload
+                        </p>
+                      </div>
+                    )}
+
+                    {/* URL Input */}
+                    {uploadMethod === "url" && (
+                      <div className="flex gap-2">
+                        <Input
+                          value={imageInput}
+                          onChange={(e) => setImageInput(e.target.value)}
+                          placeholder="/assets/product-image.jpg"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleAddImage();
+                            }
+                          }}
+                        />
+                        <Button type="button" onClick={handleAddImage}>
+                          Add
+                        </Button>
+                      </div>
+                    )}
                     
                     {/* Image Preview */}
                     {formData.images.length > 0 && (
@@ -251,6 +403,10 @@ const AdminDashboard = () => {
                               src={img}
                               alt={`Product ${index + 1}`}
                               className="w-full aspect-square object-cover rounded-lg border"
+                              onError={(e) => {
+                                // Fallback for broken images
+                                (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23ddd' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999'%3ENo Image%3C/text%3E%3C/svg%3E";
+                              }}
                             />
                             <Button
                               type="button"
@@ -270,7 +426,6 @@ const AdminDashboard = () => {
                         Add at least one image for the product
                       </p>
                     )}
-                  </div>
                 </div>
 
                 <div className="flex gap-4">
@@ -295,15 +450,40 @@ const AdminDashboard = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {products.map((product) => (
+              {products.map((product) => {
+                // Resolve image paths to module URLs
+                const productImages = ((product as any).images || [(product as any).image]).slice(0, 3).map((img: string) => {
+                  // If already a data URL or full URL, use as-is
+                  if (img.startsWith('data:') || img.startsWith('http')) {
+                    return img;
+                  }
+                  // Otherwise resolve from src/assets
+                  const parts = img.split("/");
+                  const file = parts[parts.length - 1] || img;
+                  const base = file.split(".")[0];
+                  try {
+                    return new URL(`../assets/${base}.png`, import.meta.url).href;
+                  } catch (e) {
+                    try {
+                      return new URL(`../assets/${base}.jpg`, import.meta.url).href;
+                    } catch (e2) {
+                      return img;
+                    }
+                  }
+                });
+
+                return (
                 <div key={product.id} className="flex items-center gap-4 p-4 border rounded-lg">
                   <div className="flex gap-2">
-                    {((product as any).images || [(product as any).image]).slice(0, 3).map((img: string, idx: number) => (
+                    {productImages.map((img: string, idx: number) => (
                       <img
                         key={idx}
                         src={img}
                         alt={`${product.name} ${idx + 1}`}
                         className="w-16 h-16 object-cover rounded-lg"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Crect fill='%23ddd' width='100' height='100'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' fill='%23999' font-size='12'%3ENo Image%3C/text%3E%3C/svg%3E";
+                        }}
                       />
                     ))}
                   </div>
@@ -313,7 +493,20 @@ const AdminDashboard = () => {
                     <p className="text-sm text-muted-foreground line-clamp-1">{product.description}</p>
                     <div className="flex items-center gap-2 mt-1">
                       <Badge variant="outline">{product.category}</Badge>
-                      <span className="text-sm font-medium">₹{product.pricePerGram}/g</span>
+                      <span className="text-sm font-medium">
+                        {(product as any).priceUnit === "per-piece" 
+                          ? `₹${(product as any).originalPrice || product.pricePerGram}/piece`
+                          : (product as any).priceUnit === "per-100g"
+                          ? `₹${((product as any).originalPrice || (product.pricePerGram * 100).toFixed(0))}/100g`
+                          : (product as any).priceUnit === "per-250g"
+                          ? `₹${((product as any).originalPrice || (product.pricePerGram * 250).toFixed(0))}/250g`
+                          : (product as any).priceUnit === "per-500g"
+                          ? `₹${((product as any).originalPrice || (product.pricePerGram * 500).toFixed(0))}/500g`
+                          : (product as any).priceUnit === "per-kg"
+                          ? `₹${((product as any).originalPrice || (product.pricePerGram * 1000).toFixed(0))}/kg`
+                          : `₹${product.pricePerGram}/g`
+                        }
+                      </span>
                     </div>
                   </div>
                   
@@ -331,7 +524,8 @@ const AdminDashboard = () => {
                     </Button>
                   </div>
                 </div>
-              ))}
+              );
+              })}
             </div>
           </CardContent>
         </Card>
